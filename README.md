@@ -153,3 +153,4 @@ financeControlAPI/
 | PUT    | `/api/expense/{id}`      | Actualizar una transacción     |
 | DELETE | `/api/expense/{id}`      | Eliminar una transacción       |
 
+
