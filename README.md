@@ -1,16 +1,16 @@
 # 💰 FinanceControlAPI
 
 API RESTful desarrollada con **Laravel** para la gestión y control de gastos personales.  
-Permite registrar ingresos y gastos, clasificarlos por categorías, y obtener reportes o resúmenes financieros.
+Permite registrar gastos, clasificarlos por categorías, y obtener reportes o resúmenes financieros.
 
 ---
 
 ## Características principales
 
 - Registro y autenticación de usuarios (JWT o Sanctum).  
-- Creación y gestión de **categorías** de gastos/ingresos.  
-- CRUD completo de **transacciones**.  
-- Filtros por fechas, tipo (ingreso/gasto) y categoría.  
+- Creación y gestión de **categorías** de gastos.  
+- CRUD completo de **gastos**.  
+- Filtros por fechas y categoría.  
 - Posibilidad de generar estadísticas o reportes.  
 - API documentada con Postman o Swagger.
 
@@ -19,11 +19,11 @@ Permite registrar ingresos y gastos, clasificarlos por categorías, y obtener re
 ## Tecnologías utilizadas
 
 - **PHP** >= 8.x  
-- **Laravel** 11.x  
+- **Laravel** 12  
 - **MySQL** o **SQLite**  
 - **Composer**  
-- (Opcional) **Laravel Sanctum / JWT** para autenticación  
-- (Opcional) **Postman** para pruebas de endpoints  
+- **Laravel Sanctum** para autenticación  
+- **Postman** para pruebas de endpoints  
 
 ---
 
