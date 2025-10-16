@@ -18,7 +18,7 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|category whereUpdatedAt($value)
  * @mixin \Eloquent
  */
-class category extends Model
+class Category extends Model
 {
     protected $fillable = [
         'name'

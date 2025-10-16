@@ -28,7 +28,7 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|expense whereUserId($value)
  * @mixin \Eloquent
  */
-class expense extends Model
+class Expense extends Model
 {
     protected $fillable = [
         'title',
