@@ -48,9 +48,15 @@ class ExpenseController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(expense $expense)
+    public function show(Expense $expense)
     {
-        //
+
+        if ($expense->user_id !== auth()->id()) {
+            return response()->json([
+                'message' => 'Expense not found'
+            ], 404);
+        }
+        return response()->json($expense);
     }
 
     /**
@@ -58,14 +64,41 @@ class ExpenseController extends Controller
      */
     public function update(Request $request, expense $expense)
     {
-        //
+        if ($expense->user_id !== auth()->id()) {
+            return response()->json([
+                'message' => 'Expense not found'
+            ], 404);
+        }
+        $validated = $request->validate([
+            'title' => 'sometimes|required|string|max:50|min:3',
+            'description' => 'nullable|string|max:200',
+            'amount' => 'sometimes|required|numeric',
+            'category_id' => 'exists:categories,id'
+        ]);
+        
+        $expense->update($validated);
+        return response()->json([
+            'message' => 'Expense updated successfully',
+            'data' => $expense
+        ]);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(expense $expense)
+    public function destroy(Expense $expense)
     {
-        //
+        if ($expense->user_id !== auth()->id()) {
+            return response()->json([
+                'message' => 'Expense not found'
+            ], 404);
+        }
+        $expense->delete();
+
+        return response()->json([
+            'message' => 'Expense deleted',
+            'id' => $expense->id
+
+        ]);
     }
 }
