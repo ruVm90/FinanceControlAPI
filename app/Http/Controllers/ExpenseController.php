@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\ExpenseDestroyRequest;
+use App\Http\Requests\ExpenseStoreRequest;
+use App\Http\Requests\ExpenseUpdateRequest;
 use App\Models\Expense;
 use App\Models\User;
 use Auth;
@@ -15,9 +18,9 @@ class ExpenseController extends Controller
     public function index()
     {
 
-        /** @var \Illuminate\Contracts\Auth\Guard $auth */
-        $auth = auth();
-        $expenses = Expense::where('user_id', $auth->id())
+        /** @var \Illuminate\Contracts\Auth\Guard $user */
+        $user = auth();
+        $expenses = Expense::where('user_id', $user->id())
             ->with('category')
             ->paginate(10);
         return response()->json($expenses);
@@ -26,22 +29,17 @@ class ExpenseController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(ExpenseStoreRequest $request)
     {
-        /** @var \Illuminate\Contracts\Auth\Guard $user_id */
-        $user_id = auth()->id();
-        $validated = $request->validate([
-            'title' => 'required|string|max:50|min:3',
-            'description' => 'string|max:200',
-            'amount' => 'required|numeric',
-            'category_id' => 'required|exists:categories,id'
-        ]);
+        /** @var \Illuminate\Contracts\Auth\Guard $user */
+        $user = auth();
+        $validated = $request->validated();
         $expense = Expense::create([
             'title' => $validated['title'],
             'description' => $validated['description'],
             'amount' => $validated['amount'],
             'category_id' => $validated['category_id'],
-            'user_id' => auth()->id(),
+            'user_id' => $user->id(),
         ]);
         return response()->json([
             'message' => 'Expense created successfully',
@@ -54,8 +52,9 @@ class ExpenseController extends Controller
      */
     public function show(Expense $expense)
     {
-
-        if ($expense->user_id !== auth()->id()) {
+        /** @var \Illuminate\Contracts\Auth\Guard $user */
+        $user = auth();
+        if ($expense->user_id !== $user->id()) {
             return response()->json([
                 'message' => 'Expense not found'
             ], 404);
@@ -66,19 +65,10 @@ class ExpenseController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, expense $expense)
+    public function update(ExpenseUpdateRequest $request, expense $expense)
     {
-        if ($expense->user_id !== auth()->id()) {
-            return response()->json([
-                'message' => 'Expense not found'
-            ], 404);
-        }
-        $validated = $request->validate([
-            'title' => 'sometimes|required|string|max:50|min:3',
-            'description' => 'nullable|string|max:200',
-            'amount' => 'sometimes|required|numeric',
-            'category_id' => 'exists:categories,id'
-        ]);
+
+        $validated = $request->validated();
 
         $expense->update($validated);
         return response()->json([
@@ -90,13 +80,9 @@ class ExpenseController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Expense $expense)
+    public function destroy(ExpenseDestroyRequest $request, Expense $expense)
     {
-        if ($expense->user_id !== auth()->id()) {
-            return response()->json([
-                'message' => 'Expense not found'
-            ], 404);
-        }
+       
         $expense->delete();
 
         return response()->json([
