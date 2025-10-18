@@ -15,7 +15,9 @@ class ExpenseController extends Controller
     public function index()
     {
 
-        $expenses = Expense::where('user_id', auth()->id())
+        /** @var \Illuminate\Contracts\Auth\Guard $auth */
+        $auth = auth();
+        $expenses = Expense::where('user_id', $auth->id())
             ->with('category')
             ->paginate(10);
         return response()->json($expenses);
@@ -26,6 +28,8 @@ class ExpenseController extends Controller
      */
     public function store(Request $request)
     {
+        /** @var \Illuminate\Contracts\Auth\Guard $user_id */
+        $user_id = auth()->id();
         $validated = $request->validate([
             'title' => 'required|string|max:50|min:3',
             'description' => 'string|max:200',
@@ -75,7 +79,7 @@ class ExpenseController extends Controller
             'amount' => 'sometimes|required|numeric',
             'category_id' => 'exists:categories,id'
         ]);
-        
+
         $expense->update($validated);
         return response()->json([
             'message' => 'Expense updated successfully',
