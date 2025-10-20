@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Http\Requests\ExpenseDestroyRequest;
 use App\Http\Requests\ExpenseStoreRequest;
 use App\Http\Requests\ExpenseUpdateRequest;
+use App\Http\Resources\ExpenseCollection;
+use App\Http\Resources\ExpenseResource;
 use App\Models\Expense;
 use App\Models\User;
 use Auth;
@@ -23,7 +25,7 @@ class ExpenseController extends Controller
         $expenses = Expense::where('user_id', $user->id())
             ->with('category')
             ->paginate(10);
-        return response()->json($expenses);
+        return new ExpenseCollection($expenses);
     }
 
     /**
@@ -59,7 +61,7 @@ class ExpenseController extends Controller
                 'message' => 'Expense not found'
             ], 404);
         }
-        return response()->json($expense);
+        return new ExpenseResource($expense);
     }
 
     /**
