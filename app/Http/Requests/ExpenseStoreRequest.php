@@ -24,7 +24,7 @@ class ExpenseStoreRequest extends FormRequest
         return [
             'title' => 'required|string|max:50|min:3',
             'description' => 'string|max:200',
-            'amount' => 'required|numeric',
+            'amount' => 'required|numeric|min:1',
             'category_id' => 'required|exists:categories,id'
         ];
     }

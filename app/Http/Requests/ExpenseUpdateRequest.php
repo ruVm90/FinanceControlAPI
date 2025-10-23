@@ -31,7 +31,7 @@ class ExpenseUpdateRequest extends FormRequest
             'title' => 'sometimes|required|string|max:50|min:3',
             'description' => 'nullable|string|max:200',
             'amount' => 'sometimes|required|numeric',
-            'category_id' => 'required|exists:categories,id'
+            'category_id' => 'sometimes|required|exists:categories,id'
         ];
     }
 }

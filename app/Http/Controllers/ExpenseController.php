@@ -38,7 +38,7 @@ class ExpenseController extends Controller
         $validated = $request->validated();
         $expense = Expense::create([
             'title' => $validated['title'],
-            'description' => $validated['description'],
+            'description' => $validated['description'] ?? null,
             'amount' => $validated['amount'],
             'category_id' => $validated['category_id'],
             'user_id' => $user->id(),
