@@ -6,6 +6,7 @@ use App\Http\Requests\CategoryStoreRequest;
 use App\Http\Requests\CategoryUpdateRequest;
 use App\Models\Category;
 use App\Models\Category as ModelsCategory;
+use App\Models\Expense;
 use Illuminate\Http\Request;
 
 class CategoryController extends Controller
@@ -34,6 +35,16 @@ class CategoryController extends Controller
         ], 201);
     }
 
+    public function show(Category $category){
+        $expenses = Expense::where('category_id', $category->id)
+                    ->paginate(10);
+        return response()->json([
+            'data' => [
+                'category' => $category,
+                'expenses' => $expenses
+            ]
+            ]);
+    }
 
     /**
      * Update the specified resource in storage.
