@@ -7,6 +7,9 @@ use App\Http\Requests\CategoryUpdateRequest;
 use App\Models\Category;
 use App\Models\Category as ModelsCategory;
 use App\Models\Expense;
+
+
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 
 class CategoryController extends Controller
@@ -26,9 +29,10 @@ class CategoryController extends Controller
     public function store(CategoryStoreRequest $request)
     {
         $validated = $request->validated();
+        /** @var \App\Models\User $user */
+        $user = auth()->user();
 
-        $category = Category::create($validated);
-
+        $category = Auth::user()->categories()->create($validated);
         return response()->json([
             'message' => 'Category created successfully',
             'data' => $category
