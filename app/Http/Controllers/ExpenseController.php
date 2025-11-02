@@ -67,7 +67,7 @@ class ExpenseController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(ExpenseUpdateRequest $request, expense $expense)
+    public function update(ExpenseUpdateRequest $request, Expense $expense)
     {
 
         $validated = $request->validated();
