@@ -61,6 +61,7 @@ class ExpenseController extends Controller
                 'message' => 'Expense not found'
             ], 404);
         }
+        $expense = $expense->load('category');
         return new ExpenseResource($expense);
     }
 
