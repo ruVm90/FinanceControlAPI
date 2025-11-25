@@ -85,7 +85,7 @@ class ExpenseController extends Controller
      */
     public function destroy(ExpenseDestroyRequest $request, Expense $expense)
     {
-       
+
         $expense->delete();
 
         return response()->json([
@@ -94,4 +94,5 @@ class ExpenseController extends Controller
 
         ]);
     }
+
 }
