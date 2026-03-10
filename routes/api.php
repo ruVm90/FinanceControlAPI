@@ -3,10 +3,8 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ExpenseController;
-use App\Http\Controllers\statisticController;
+use App\Http\Controllers\StatisticController;
 use App\Http\Controllers\WebAuthController;
-use Illuminate\Container\Attributes\Auth;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 // rutas publicas
@@ -20,7 +18,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('categories', CategoryController::class);
     Route::post('logout', [AuthController::class, 'logout']);
     Route::get('user', [WebAuthController::class, 'user']);
-    Route::get('statistics',[statisticController::class, 'getStatistics']);
+    Route::prefix('statistics')->group(function () {
+        Route::get('summary' , [StatisticController::class , 'summary']);
+    });
 });
 
 
