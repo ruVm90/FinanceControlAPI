@@ -61,4 +61,57 @@ class StatisticsService
             ],
         ];
     }
+
+    public function getByCategory(int $month, int $year): array
+    {
+        $userId = Auth::id();
+
+        // Construimos las fechas a partir del mes y año recibidos
+        $startOfMonth = Carbon::createFromDate($year, $month, 1)->startOfMonth();
+        $endOfMonth   = Carbon::createFromDate($year, $month, 1)->endOfMonth();
+
+        // Mismo periodo pero del mes anterior para la comparativa
+        $startOfLastMonth = $startOfMonth->copy()->subMonth()->startOfMonth();
+        $endOfLastMonth   = $startOfMonth->copy()->subMonth()->endOfMonth();
+
+        // Total gastado en el mes para calcular porcentajes
+        $totalMonth = Expense::where('user_id', $userId)
+            ->whereBetween('created_at', [$startOfMonth, $endOfMonth])
+            ->sum('amount');
+
+        // Gastos del mes anterior agrupados por categoría
+        $lastMonthByCategory = Expense::where('user_id', $userId)
+            ->whereBetween('created_at', [$startOfLastMonth, $endOfLastMonth])
+            ->selectRaw('category_id, SUM(amount) as total')
+            ->groupBy('category_id')
+            ->pluck('total', 'category_id');
+
+        // Gastos del mes actual agrupados por categoría
+        $expenses = Expense::where('user_id', $userId)
+            ->whereBetween('created_at', [$startOfMonth, $endOfMonth])
+            ->selectRaw('category_id, SUM(amount) as total, COUNT(*) as expenses_count')
+            ->groupBy('category_id')
+            ->with('category')
+            ->get();
+
+        // Formateamos los resultados
+        $data = $expenses->map(function ($expense) use ($totalMonth, $lastMonthByCategory) {
+
+            $lastMonthTotal = $lastMonthByCategory->get($expense->category_id, 0);
+            $amountDiff     = round($expense->total - $lastMonthTotal, 2);
+
+            return [
+                'category_id'        => $expense->category_id,
+                'category_name'      => $expense->category->name,
+                'total'              => round($expense->total, 2),
+                'percentage_of_total' => $totalMonth > 0
+                    ? round(($expense->total / $totalMonth) * 100, 1)
+                    : 0,
+                'expenses_count'     => $expense->expenses_count,
+                'vs_last_month_diff' => $amountDiff,
+            ];
+        })->values()->toArray();
+
+        return ['data' => $data];
+    }
 }
