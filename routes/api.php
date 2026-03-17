@@ -22,6 +22,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/summary' , [StatisticController::class , 'summary']);
         Route::get('/by-category' , [StatisticController::class , 'byCategory']);
         Route::get('/trends' , [StatisticController::class , 'trends']);
+        Route::get('/forecast' , [StatisticController::class , 'forecast']);
     });
 });
 

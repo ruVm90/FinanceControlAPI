@@ -56,4 +56,17 @@ class StatisticController extends Controller
 
         return response()->json($data);
     }
+
+    /**
+     * Obtiene los días transcurridos del mes actual y los que quedan
+     * Divide lo gastado hasta hoy entre los días transcurridos → promedio diario
+     * Multiplica ese promedio por los días totales del mes → proyección
+     * Compara la proyección con el total real del mes anterior
+     */
+    public function forecast(): JsonResponse
+    {
+        $data = $this->service->getForecast();
+
+        return response()->json($data);
+    }
 }

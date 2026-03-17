@@ -117,30 +117,80 @@ class StatisticsService
 
 
     public function getTrends(int $months): array
-{
-    $userId = Auth::id();
+    {
+        $userId = Auth::id();
 
-    // Generamos un array con los últimos N meses
-    $data = collect(range(0, $months - 1))->map(function ($i) use ($userId) {
+        // Generamos un array con los últimos N meses
+        $data = collect(range(0, $months - 1))->map(function ($i) use ($userId) {
 
-        // Carbon::now()->subMonths(0) = mes actual
-        // Carbon::now()->subMonths(1) = mes anterior, etc.
-        $date  = Carbon::now()->subMonths($i);
-        $start = $date->copy()->startOfMonth();
-        $end   = $date->copy()->endOfMonth();
+            // Carbon::now()->subMonths(0) = mes actual
+            // Carbon::now()->subMonths(1) = mes anterior, etc.
+            $date  = Carbon::now()->subMonths($i);
+            $start = $date->copy()->startOfMonth();
+            $end   = $date->copy()->endOfMonth();
 
-        $total = Expense::where('user_id', $userId)
-            ->whereBetween('created_at', [$start, $end])
+            $total = Expense::where('user_id', $userId)
+                ->whereBetween('created_at', [$start, $end])
+                ->sum('amount');
+
+            return [
+                'month' => $date->format('Y-m'),       // "2026-03"
+                'label' => $date->locale('es')->isoFormat('MMMM YYYY'), // "marzo 2026"
+                'total' => round($total, 2),
+            ];
+        });
+
+        // reverse() para que el array vaya del más antiguo al más reciente
+        return ['data' => $data->reverse()->values()->toArray()];
+    }
+
+    public function getForecast(): array
+    {
+        $userId = Auth::id();
+
+        $now   = Carbon::now();
+
+        // Días transcurridos y días totales del mes
+        $daysElapsed  = $now->day;
+        $daysInMonth  = $now->daysInMonth;
+        $daysRemaining = $daysInMonth - $daysElapsed;
+
+        // Total gastado en lo que llevamos de mes
+        $startOfCurrentMonth = $now->copy()->startOfMonth();
+
+        $spentSoFar = Expense::where('user_id', $userId)
+            ->whereBetween('created_at', [$startOfCurrentMonth, $now])
             ->sum('amount');
 
-        return [
-            'month' => $date->format('Y-m'),       // "2026-03"
-            'label' => $date->locale('es')->isoFormat('MMMM YYYY'), // "marzo 2026"
-            'total' => round($total, 2),
-        ];
-    });
+        // Media diaria basada en lo gastado hasta hoy
+        $dailyAvg = $daysElapsed > 0
+            ? round($spentSoFar / $daysElapsed, 2)
+            : 0;
 
-    // reverse() para que el array vaya del más antiguo al más reciente
-    return ['data' => $data->reverse()->values()->toArray()];
-}
+        // Proyección: si seguimos al mismo ritmo, ¿cuánto gastaremos?
+        $projectedTotal = round($dailyAvg * $daysInMonth, 2);
+
+        // Total del mes anterior para comparar
+        $startOfLastMonth = $now->copy()->subMonth()->startOfMonth();
+        $endOfLastMonth   = $now->copy()->subMonth()->endOfMonth();
+
+        $lastMonthTotal = Expense::where('user_id', $userId)
+            ->whereBetween('created_at', [$startOfLastMonth, $endOfLastMonth])
+            ->sum('amount');
+
+        // Diferencia entre la proyección y el mes anterior
+        $vsLastMonth = $lastMonthTotal > 0
+            ? round((($projectedTotal - $lastMonthTotal) / $lastMonthTotal) * 100, 1)
+            : null;
+
+        return [
+            'days_elapsed'    => $daysElapsed,
+            'days_remaining'  => $daysRemaining,
+            'days_in_month'   => $daysInMonth,
+            'spent_so_far'    => round($spentSoFar, 2),
+            'daily_avg'       => $dailyAvg,
+            'projected_total' => $projectedTotal,
+            'vs_last_month'   => $vsLastMonth,
+        ];
+    }
 }
