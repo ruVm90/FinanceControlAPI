@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StatisticsByCategoryRequest;
+use App\Http\Requests\StatisticsTrendsRequest;
 use App\Services\StatisticsService;
 use Carbon\Carbon;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -38,6 +39,20 @@ class StatisticController extends Controller
         $year  = $request->integer('year', now()->year);
 
         $data = $this->service->getByCategory($month, $year);
+
+        return response()->json($data);
+    }
+
+    /**
+     * Agrupa los gastos por mes"Devuelve los gastos agregados por mes para los últimos N meses,
+     * listos para ser representados en un gráfico o dashboard"
+     */
+    public function trends(StatisticsTrendsRequest $request): JsonResponse
+    {
+        // Si no viene el parámetro usamos 6 meses por defecto
+        $months = $request->integer('months', 6);
+
+        $data = $this->service->getTrends($months);
 
         return response()->json($data);
     }

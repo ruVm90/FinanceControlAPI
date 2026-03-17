@@ -114,4 +114,33 @@ class StatisticsService
 
         return ['data' => $data];
     }
+
+
+    public function getTrends(int $months): array
+{
+    $userId = Auth::id();
+
+    // Generamos un array con los últimos N meses
+    $data = collect(range(0, $months - 1))->map(function ($i) use ($userId) {
+
+        // Carbon::now()->subMonths(0) = mes actual
+        // Carbon::now()->subMonths(1) = mes anterior, etc.
+        $date  = Carbon::now()->subMonths($i);
+        $start = $date->copy()->startOfMonth();
+        $end   = $date->copy()->endOfMonth();
+
+        $total = Expense::where('user_id', $userId)
+            ->whereBetween('created_at', [$start, $end])
+            ->sum('amount');
+
+        return [
+            'month' => $date->format('Y-m'),       // "2026-03"
+            'label' => $date->locale('es')->isoFormat('MMMM YYYY'), // "marzo 2026"
+            'total' => round($total, 2),
+        ];
+    });
+
+    // reverse() para que el array vaya del más antiguo al más reciente
+    return ['data' => $data->reverse()->values()->toArray()];
+}
 }

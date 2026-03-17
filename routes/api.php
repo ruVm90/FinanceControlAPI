@@ -19,8 +19,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('logout', [AuthController::class, 'logout']);
     Route::get('user', [WebAuthController::class, 'user']);
     Route::prefix('statistics')->group(function () {
-        Route::get('summary' , [StatisticController::class , 'summary']);
-        Route::get('by-category' , [StatisticController::class , 'byCategory']);
+        Route::get('/summary' , [StatisticController::class , 'summary']);
+        Route::get('/by-category' , [StatisticController::class , 'byCategory']);
+        Route::get('/trends' , [StatisticController::class , 'trends']);
     });
 });
 
